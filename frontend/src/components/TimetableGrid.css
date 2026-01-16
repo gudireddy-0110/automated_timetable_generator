@@ -1,0 +1,16 @@
+.timetable-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.timetable-table th,
+.timetable-table td {
+  border: 1px solid #888;
+  padding: 8px;
+  text-align: center;
+}
+
+.timetable-table th {
+  background-color: #f0f0f0;
+}
