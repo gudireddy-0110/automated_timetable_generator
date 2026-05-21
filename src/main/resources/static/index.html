@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoSched AI - Gudi Indhu Reddy</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0d0d0d; color: #e5e7eb; font-family: 'DM Sans', sans-serif; }
+        .header { padding: 1.5rem 3rem; border-bottom: 1px solid #1f1f1f; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #f5f5f5, #a3e635, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav { display: flex; gap: 0.5rem; padding: 1rem 3rem; border-bottom: 1px solid #1f1f1f; overflow-x: auto; }
+        .nav-btn { background: #161616; border: 1px solid #222; color: #6b7280; padding: 0.5rem 1.2rem; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; white-space: nowrap; }
+        .nav-btn.active { background: #1a2e1a; border-color: #a3e635; color: #a3e635; }
+        .container { max-width: 1300px; margin: 0 auto; padding: 2rem 3rem; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .card { background: #161616; border: 1px solid #222; border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card h2 { font-family: 'Syne', sans-serif; font-size: 0.85rem; color: #a3e635; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.2rem; }
+        .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+        input, select { width: 100%; background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 0.6rem 1rem; color: #e5e7eb; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; margin-bottom: 0.7rem; }
+        input:focus, select:focus { outline: none; border-color: #a3e635; }
+        .btn { background: linear-gradient(135deg, #a3e635, #22d3ee); color: #000; border: none; border-radius: 8px; padding: 0.6rem 1.5rem; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; width: 100%; margin-top: 0.3rem; }
+        .btn:hover { opacity: 0.85; }
+        .btn-big { font-size: 1.1rem; padding: 1rem; border-radius: 12px; }
+        .btn-danger { background: #450a0a; color: #fca5a5; }
+        .btn-secondary { background: #1f1f1f; color: #e5e7eb; border: 1px solid #333; }
+        .status { padding: 0.7rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem; display: none; }
+        .status.success { background: #14532d; color: #86efac; display: block; }
+        .status.error { background: #450a0a; color: #fca5a5; display: block; }
+        .status.info { background: #1c3451; color: #93c5fd; display: block; }
+        .list-item { background: #111; border: 1px solid #1f1f1f; border-radius: 8px; padding: 0.7rem 1rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.83rem; }
+        .list-item button { width: auto; background: #450a0a; color: #fca5a5; padding: 0.2rem 0.6rem; font-size: 0.73rem; margin: 0; border: none; border-radius: 5px; cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 700; }
+        .badge { padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+        .badge-green { background: #14532d; color: #86efac; }
+        .badge-blue { background: #1c3451; color: #93c5fd; }
+        .badge-yellow { background: #1c1400; color: #fde68a; }
+        .metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .metric { background: #161616; border: 1px solid #222; border-radius: 12px; padding: 1.2rem; text-align: center; }
+        .metric-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: #a3e635; }
+        .metric-label { color: #4b5563; font-size: 0.78rem; margin-top: 0.2rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #1f1f1f; padding: 0.7rem; font-family: 'Syne', sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; text-align: center; }
+        td { padding: 0.5rem; border: 1px solid #1a1a1a; text-align: center; font-size: 0.78rem; vertical-align: top; min-width: 100px; }
+        .slot { background: #1a2e1a; border: 1px solid #14532d; border-radius: 6px; padding: 0.35rem; margin: 2px; }
+        .slot-subject { color: #86efac; font-weight: 600; font-size: 0.75rem; }
+        .slot-faculty { color: #6b7280; font-size: 0.68rem; }
+        .slot-room { color: #22d3ee; font-size: 0.65rem; }
+        .empty { color: #1f1f1f; }
+        .filter-bar { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: flex-end; flex-wrap: wrap; }
+        .filter-bar > div { flex: 1; min-width: 150px; }
+        .filter-bar label { font-size: 0.72rem; color: #4b5563; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 0.3rem; }
+        .filter-bar .btn { margin-top: 0; }
+        .upload-zone { border: 2px dashed #2a2a2a; border-radius: 12px; padding: 2rem; text-align: center; color: #4b5563; margin-bottom: 1rem; }
+        .upload-zone input[type=file] { display: none; }
+        .upload-zone label { cursor: pointer; color: #a3e635; text-decoration: underline; }
+        .section-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .section-tab { background: #161616; border: 1px solid #222; color: #6b7280; padding: 0.4rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.82rem; }
+        .section-tab.active { background: #1a2e1a; border-color: #a3e635; color: #a3e635; }
+        .footer { text-align: center; color: #374151; font-size: 0.78rem; padding: 2rem; border-top: 1px solid #1f1f1f; margin-top: 3rem; }
+        .footer strong { color: #a3e635; }
+        .sample-csv { background: #111; border: 1px solid #1f1f1f; border-radius: 8px; padding: 1rem; font-family: monospace; font-size: 0.78rem; color: #6b7280; margin-bottom: 1rem; }
+        .role-badge { padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+        .role-admin { background: #1c3451; color: #93c5fd; }
+        .role-principal { background: #1c1400; color: #fde68a; }
+        .role-faculty { background: #14532d; color: #86efac; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">College Scheduler</div>
+    <div style="display:flex; align-items:center; gap:1rem;">
+        <div id="userInfo" style="font-size:0.85rem;"></div>
+    </div>
+</div>
+
+<div class="nav">
+    <button class="nav-btn active" id="nav-dashboard" onclick="showPage('dashboard')">📊 Dashboard</button>
+    <button class="nav-btn" id="nav-branches" onclick="showPage('branches')">🏛 Branches</button>
+    <button class="nav-btn" id="nav-faculty" onclick="showPage('faculty')">👩‍🏫 Faculty</button>
+    <button class="nav-btn" id="nav-upload" onclick="showPage('upload')">📤 CSV Upload</button>
+    <button class="nav-btn" id="nav-generate" onclick="showPage('generate')">⚡ Generate</button>
+    <button class="nav-btn" id="nav-timetable" onclick="showPage('timetable')">📅 Section Timetable</button>
+    <button class="nav-btn" id="nav-faculty-tt" onclick="showPage('faculty-tt')">👤 Faculty Timetable</button>
+    <button class="nav-btn" id="nav-rooms" onclick="showPage('rooms')">🏫 Room Utilization</button>
+    <button class="nav-btn" id="nav-users" onclick="showPage('users')">👥 Manage Users</button>
+</div>
+
+<div class="container">
+    <div id="status" class="status"></div>
+
+    <!-- DASHBOARD -->
+    <div id="page-dashboard" class="page active">
+        <div class="metric-grid" id="metrics">
+            <div class="metric"><div class="metric-num" id="m-slots">—</div><div class="metric-label">Total Slots Generated</div></div>
+            <div class="metric"><div class="metric-num" id="m-branches">—</div><div class="metric-label">Branches</div></div>
+            <div class="metric"><div class="metric-num" id="m-subjects">—</div><div class="metric-label">Subjects</div></div>
+            <div class="metric"><div class="metric-num" id="m-assignments">—</div><div class="metric-label">Faculty Assignments</div></div>
+        </div>
+        <div class="card">
+            <h2>🚀 Quick Start Guide</h2>
+            <div style="color:#6b7280; font-size:0.88rem; line-height:2;">
+                <div>1️⃣ &nbsp;<strong style="color:#e5e7eb;">Branches</strong> — Add your college branches and set section count</div>
+                <div>2️⃣ &nbsp;<strong style="color:#e5e7eb;">CSV Upload</strong> — Upload faculty-subject assignments CSV</div>
+                <div>3️⃣ &nbsp;<strong style="color:#e5e7eb;">Generate</strong> — Auto-generate conflict-free timetables</div>
+                <div>4️⃣ &nbsp;<strong style="color:#e5e7eb;">View</strong> — Browse section, faculty, and room timetables</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BRANCHES -->
+    <div id="page-branches" class="page">
+        <div class="grid2">
+            <div class="card">
+                <h2>➕ Add Branch</h2>
+                <input type="text" id="branchName" placeholder="Branch Name (e.g. IT, CSE, ECE)">
+                <input type="number" id="branchSections" placeholder="Number of Sections (e.g. 3)" min="1" max="6">
+                <button class="btn" onclick="addBranch()">Add Branch</button>
+            </div>
+            <div class="card">
+                <h2>🏛 Existing Branches</h2>
+                <div id="branchList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FACULTY -->
+    <div id="page-faculty" class="page">
+        <div class="grid2">
+            <div class="card">
+                <h2>➕ Add Faculty Manually</h2>
+                <input type="text" id="facName" placeholder="Faculty Name">
+                <input type="text" id="facDept" placeholder="Department (e.g. IT)">
+                <input type="number" id="facHours" placeholder="Max Hours/Week (default 20)" value="20">
+                <button class="btn" onclick="addFaculty()">Add Faculty</button>
+            </div>
+            <div class="card">
+                <h2>👩‍🏫 Faculty List</h2>
+                <div id="facultyList"></div>
+            </div>
+        </div>
+        <div class="card">
+            <h2>📋 Faculty Assignments</h2>
+            <div style="margin-bottom:1rem;">
+                <div class="grid3">
+                    <input type="text" id="aFaculty" placeholder="Faculty Name">
+                    <input type="text" id="aSubject" placeholder="Subject Name">
+                    <input type="text" id="aBranch" placeholder="Branch (e.g. IT)">
+                </div>
+                <div class="grid2">
+                    <input type="number" id="aYear" placeholder="Year (1-4)" min="1" max="4">
+                    <input type="text" id="aSection" placeholder="Section (A/B/C)">
+                </div>
+                <button class="btn" onclick="addAssignment()">Add Assignment</button>
+            </div>
+            <div id="assignmentList"></div>
+        </div>
+    </div>
+
+    <!-- CSV UPLOAD -->
+    <div id="page-upload" class="page">
+        <div class="card">
+            <h2>📤 Upload Faculty Assignments CSV</h2>
+            <div class="sample-csv">
+faculty_name,subject_name,branch,year<br>
+Dr. Sharma,Data Structures,IT,3<br>
+Dr. Reddy,DBMS,IT,3<br>
+Dr. Rao,Computer Networks,IT,3<br>
+Dr. Kumar,Operating Systems,CSE,2<br>
+Dr. Priya,Data Structures Lab,IT,3
+            </div>
+            <div class="upload-zone">
+                <div style="font-size:2rem; margin-bottom:0.5rem;">📄</div>
+                <div>Drop CSV here or <label for="csvFile">browse to upload</label></div>
+                <div style="font-size:0.75rem; margin-top:0.3rem;">Columns: faculty_name, subject_name, branch, year</div>
+                <input type="file" id="csvFile" accept=".csv" onchange="uploadCsv()">
+            </div>
+            <div id="uploadResult"></div>
+        </div>
+    </div>
+
+    <!-- GENERATE -->
+    <div id="page-generate" class="page">
+        <div class="card">
+            <h2>⚡ Generate Conflict-Free Timetables</h2>
+            <div style="color:#6b7280; font-size:0.88rem; margin-bottom:1.5rem; line-height:1.8;">
+                The scheduler will automatically:<br>
+                ✓ Assign subjects to all sections per branch+year<br>
+                ✓ Ensure no faculty teaches two sections at the same time<br>
+                ✓ Ensure no classroom is double-booked<br>
+                ✓ Distribute subjects across Mon–Sat, 6 periods/day
+            </div>
+            <button class="btn btn-big" onclick="generateTimetable()">⚡ Generate All Timetables</button>
+        </div>
+        <div class="card" id="generateResult" style="display:none;">
+            <h2>✅ Generation Result</h2>
+            <div id="generateDetails"></div>
+        </div>
+    </div>
+
+    <!-- SECTION TIMETABLE -->
+    <div id="page-timetable" class="page">
+        <div class="card">
+            <div class="filter-bar">
+                <div>
+                    <label>Branch</label>
+                    <input type="text" id="ttBranch" placeholder="e.g. IT" style="margin:0;">
+                </div>
+                <div>
+                    <label>Year</label>
+                    <select id="ttYear" style="margin:0;">
+                        <option value="1">Year 1</option>
+                        <option value="2">Year 2</option>
+                        <option value="3" selected>Year 3</option>
+                        <option value="4">Year 4</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Section</label>
+                    <input type="text" id="ttSection" placeholder="e.g. A" style="margin:0;">
+                </div>
+                <div style="flex:0.5;">
+                    <label>&nbsp;</label>
+                    <button class="btn" style="margin:0;" onclick="loadSectionTimetable()">View →</button>
+                </div>
+                <div style="flex:0.5;">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-secondary" style="margin:0;" onclick="exportPDF('Section Timetable')">⬇ PDF</button>
+                </div>
+            </div>
+        </div>
+        <div id="sectionTimetableContainer"></div>
+    </div>
+
+    <!-- FACULTY TIMETABLE -->
+    <div id="page-faculty-tt" class="page">
+        <div class="card">
+            <div class="filter-bar">
+                <div>
+                    <label>Faculty Name</label>
+                    <input type="text" id="facTTName" placeholder="e.g. Dr. Sharma" style="margin:0;">
+                </div>
+                <div style="flex:0.5;">
+                    <label>&nbsp;</label>
+                    <button class="btn" style="margin:0;" onclick="loadFacultyTimetable()">View →</button>
+                </div>
+                <div style="flex:0.5;">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-secondary" style="margin:0;" onclick="exportPDF('Faculty Timetable')">⬇ PDF</button>
+                </div>
+            </div>
+        </div>
+        <div id="facultyTimetableContainer"></div>
+    </div>
+
+    <!-- ROOM UTILIZATION -->
+    <div id="page-rooms" class="page">
+        <div class="card">
+            <div class="filter-bar">
+                <div>
+                    <label>Room Number</label>
+                    <input type="text" id="roomNum" placeholder="e.g. A101" style="margin:0;">
+                </div>
+                <div style="flex:0.5;">
+                    <label>&nbsp;</label>
+                    <button class="btn" style="margin:0;" onclick="loadRoomUtilization()">View →</button>
+                </div>
+                <div style="flex:0.5;">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-secondary" style="margin:0;" onclick="exportPDF('Room Utilization')">⬇ PDF</button>
+                </div>
+            </div>
+        </div>
+        <div id="roomContainer"></div>
+    </div>
+
+    <!-- MANAGE USERS -->
+    <div id="page-users" class="page">
+        <div class="grid2">
+            <div class="card">
+                <h2>➕ Add New User</h2>
+                <input type="text" id="newUsername" placeholder="Username">
+                <input type="password" id="newPassword" placeholder="Password">
+                <input type="text" id="newFullName" placeholder="Full Name">
+                <input type="text" id="newDepartment" placeholder="Department">
+                <select id="newRole">
+                    <option value="ADMIN">Admin</option>
+                    <option value="PRINCIPAL">Principal</option>
+                    <option value="FACULTY">Faculty</option>
+                </select>
+                <button class="btn" onclick="addUser()">Add User</button>
+            </div>
+            <div class="card">
+                <h2>👥 All Users</h2>
+                <div id="userList"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    Built by <strong>Gudi Indhu Reddy</strong> ·
+    Java Spring Boot + MySQL + REST APIs + Spring Security
+</div>
+
+<script>
+const API = 'http://localhost:8081/api';
+let currentUser = null;
+
+async function loadCurrentUser() {
+    try {
+        const res = await fetch('/api/auth/me');
+        currentUser = await res.json();
+        if (currentUser && currentUser.username) {
+            document.getElementById('userInfo').innerHTML = `
+                <span style="color:#a3e635; font-weight:600;">${currentUser.fullName || currentUser.username}</span>
+                <span style="color:#4b5563; margin-left:0.5rem;">[${currentUser.role}]</span>
+                <a href="/logout" style="color:#fca5a5; margin-left:1rem; text-decoration:none; font-size:0.82rem;">Logout</a>
+            `;
+            applyRoleBasedAccess(currentUser.role);
+        }
+    } catch(e) { console.log('Auth error', e); }
+}
+
+function applyRoleBasedAccess(role) {
+    if (role === 'FACULTY') {
+        document.getElementById('nav-branches').style.display = 'none';
+        document.getElementById('nav-upload').style.display = 'none';
+        document.getElementById('nav-generate').style.display = 'none';
+        document.getElementById('nav-timetable').style.display = 'none';
+        document.getElementById('nav-rooms').style.display = 'none';
+        document.getElementById('nav-users').style.display = 'none';
+        showPageDirect('faculty-tt');
+        if (currentUser.fullName) {
+            document.getElementById('facTTName').value = currentUser.fullName;
+            loadFacultyTimetable();
+        }
+    } else if (role === 'PRINCIPAL') {
+        document.getElementById('nav-branches').style.display = 'none';
+        document.getElementById('nav-upload').style.display = 'none';
+        document.getElementById('nav-generate').style.display = 'none';
+        document.getElementById('nav-users').style.display = 'none';
+    }
+}
+
+function showPageDirect(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    const btn = document.getElementById('nav-' + name);
+    if (btn) btn.classList.add('active');
+}
+
+function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    event.target.classList.add('active');
+    if (name === 'dashboard') loadStats();
+    if (name === 'branches') loadBranches();
+    if (name === 'faculty') { loadFaculty(); loadAssignments(); }
+    if (name === 'users') loadUsers();
+}
+
+function showStatus(msg, type) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = 'status ' + type;
+    setTimeout(() => el.style.display = 'none', 5000);
+}
+
+// ── STATS ─────────────────────────────────────────────────────
+async function loadStats() {
+    const res = await fetch(`${API}/timetable/stats`);
+    const s = await res.json();
+    document.getElementById('m-slots').textContent = s.totalSlots;
+    document.getElementById('m-branches').textContent = s.totalBranches;
+    document.getElementById('m-subjects').textContent = s.totalSubjects;
+    document.getElementById('m-assignments').textContent = s.totalFacultyAssignments;
+}
+
+// ── BRANCHES ──────────────────────────────────────────────────
+async function addBranch() {
+    const name = document.getElementById('branchName').value.trim();
+    const sections = parseInt(document.getElementById('branchSections').value);
+    if (!name || !sections) { showStatus('Fill all fields', 'error'); return; }
+    await fetch(`${API}/branches`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({name, totalSections: sections})
+    });
+    showStatus('Branch added!', 'success');
+    document.getElementById('branchName').value = '';
+    document.getElementById('branchSections').value = '';
+    loadBranches();
+}
+
+async function loadBranches() {
+    const res = await fetch(`${API}/branches`);
+    const branches = await res.json();
+    document.getElementById('branchList').innerHTML = branches.length
+        ? branches.map(b => `
+            <div class="list-item">
+                <span><strong>${b.name}</strong> · ${b.totalSections} sections</span>
+                <button onclick="deleteBranch(${b.id})">✕</button>
+            </div>`).join('')
+        : '<div style="color:#374151;font-size:0.82rem;">No branches yet</div>';
+}
+
+async function deleteBranch(id) {
+    await fetch(`${API}/branches/${id}`, {method:'DELETE'});
+    loadBranches();
+}
+
+// ── FACULTY ───────────────────────────────────────────────────
+async function addFaculty() {
+    const name = document.getElementById('facName').value.trim();
+    const department = document.getElementById('facDept').value.trim();
+    const maxHoursPerWeek = parseInt(document.getElementById('facHours').value) || 20;
+    if (!name || !department) { showStatus('Fill all fields', 'error'); return; }
+    await fetch(`${API}/faculty`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({name, department, maxHoursPerWeek})
+    });
+    showStatus('Faculty added!', 'success');
+    document.getElementById('facName').value = '';
+    document.getElementById('facDept').value = '';
+    loadFaculty();
+}
+
+async function loadFaculty() {
+    const res = await fetch(`${API}/faculty`);
+    const list = await res.json();
+    document.getElementById('facultyList').innerHTML = list.length
+        ? list.map(f => `
+            <div class="list-item">
+                <span><strong>${f.name}</strong> · ${f.department} · ${f.maxHoursPerWeek}h/week</span>
+                <button onclick="deleteFaculty(${f.id})">✕</button>
+            </div>`).join('')
+        : '<div style="color:#374151;font-size:0.82rem;">No faculty yet</div>';
+}
+
+async function deleteFaculty(id) {
+    await fetch(`${API}/faculty/${id}`, {method:'DELETE'});
+    loadFaculty();
+}
+
+async function addAssignment() {
+    const facultyName = document.getElementById('aFaculty').value.trim();
+    const subjectName = document.getElementById('aSubject').value.trim();
+    const branch      = document.getElementById('aBranch').value.trim();
+    const year        = parseInt(document.getElementById('aYear').value);
+    const section     = document.getElementById('aSection').value.trim();
+    if (!facultyName||!subjectName||!branch||!year||!section) { showStatus('Fill all fields','error'); return; }
+    await fetch(`${API}/faculty/assignments`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({facultyName, subjectName, branch, year, section})
+    });
+    showStatus('Assignment added!', 'success');
+    loadAssignments();
+}
+
+async function loadAssignments() {
+    const res = await fetch(`${API}/faculty/assignments`);
+    const list = await res.json();
+    document.getElementById('assignmentList').innerHTML = list.length
+        ? list.map(a => `
+            <div class="list-item">
+                <span>
+                    <strong>${a.facultyName}</strong> →
+                    ${a.subjectName} ·
+                    <span class="badge badge-blue">${a.branch} Y${a.year} Sec-${a.section}</span>
+                </span>
+                <button onclick="deleteAssignment(${a.id})">✕</button>
+            </div>`).join('')
+        : '<div style="color:#374151;font-size:0.82rem;">No assignments yet</div>';
+}
+
+async function deleteAssignment(id) {
+    await fetch(`${API}/faculty/assignments/${id}`, {method:'DELETE'});
+    loadAssignments();
+}
+
+// ── CSV UPLOAD ────────────────────────────────────────────────
+async function uploadCsv() {
+    const file = document.getElementById('csvFile').files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('file', file);
+    showStatus('Uploading CSV...', 'info');
+    const res = await fetch(`${API}/csv/upload`, {method:'POST', body: formData});
+    const result = await res.json();
+    document.getElementById('uploadResult').innerHTML = `
+        <div class="list-item" style="flex-direction:column; align-items:flex-start; gap:0.3rem;">
+            <div>✅ Imported: <strong style="color:#86efac;">${result.imported}</strong> rows</div>
+            <div>⚠️ Skipped: <strong style="color:#fde68a;">${result.skipped}</strong> rows</div>
+            ${result.errors.length ? '<div style="color:#fca5a5;">Errors: ' + result.errors.join(', ') + '</div>' : ''}
+        </div>`;
+    showStatus('CSV uploaded successfully!', 'success');
+}
+
+// ── GENERATE ──────────────────────────────────────────────────
+async function generateTimetable() {
+    showStatus('Generating timetables — this may take a moment...', 'info');
+    const res = await fetch(`${API}/timetable/generate`, {method:'POST'});
+    if (res.ok) {
+        const result = await res.json();
+        document.getElementById('generateResult').style.display = 'block';
+        document.getElementById('generateDetails').innerHTML = `
+            <div style="color:#a3e635; font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; margin-bottom:1rem;">
+                ${result.totalSlots} slots generated
+            </div>
+            ${result.generated.map(g => `<div class="list-item">${g}</div>`).join('')}`;
+        showStatus('Timetables generated successfully!', 'success');
+        loadStats();
+    } else {
+        const err = await res.text();
+        showStatus('Error: ' + err, 'error');
+    }
+}
+
+// ── TIMETABLE GRID HELPER ─────────────────────────────────────
+function buildGrid(slots, title) {
+    if (!slots.length) return '<div class="card" style="text-align:center;color:#374151;padding:2rem;">No timetable found.</div>';
+    const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const PERIODS = [1,2,3,4,5,6];
+    const map = {};
+    slots.forEach(s => {
+        const key = s.day + '-' + s.period;
+        if (!map[key]) map[key] = [];
+        map[key].push(s);
+    });
+    let html = `<div class="card"><h2>${title}</h2><div style="overflow-x:auto;"><table><thead><tr><th>Period</th>`;
+    DAYS.forEach(d => html += `<th>${d}</th>`);
+    html += '</tr></thead><tbody>';
+    PERIODS.forEach(p => {
+        html += `<tr><td><strong style="color:#a3e635;">P${p}</strong></td>`;
+        DAYS.forEach(d => {
+            const entries = map[d + '-' + p] || [];
+            if (entries.length) {
+                html += '<td>' + entries.map(e => `
+                    <div class="slot">
+                        <div class="slot-subject">${e.subjectName}</div>
+                        <div class="slot-faculty">${e.facultyName}</div>
+                        <div class="slot-room">🏫 ${e.roomNumber}</div>
+                        ${e.section ? `<div style="color:#fde68a;font-size:0.62rem;">Sec-${e.section}</div>` : ''}
+                    </div>`).join('') + '</td>';
+            } else {
+                html += '<td><span class="empty">—</span></td>';
+            }
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table></div></div>';
+    return html;
+}
+
+// ── SECTION TIMETABLE ─────────────────────────────────────────
+async function loadSectionTimetable() {
+    const branch  = document.getElementById('ttBranch').value.trim().toUpperCase();
+    const year    = document.getElementById('ttYear').value;
+    const section = document.getElementById('ttSection').value.trim().toUpperCase();
+    if (!branch || !section) { showStatus('Enter branch and section', 'error'); return; }
+    const res = await fetch(`${API}/timetable/section?branch=${branch}&year=${year}&section=${section}`);
+    const slots = await res.json();
+    document.getElementById('sectionTimetableContainer').innerHTML =
+        buildGrid(slots, `${branch} · Year ${year} · Section ${section}`);
+}
+
+// ── FACULTY TIMETABLE ─────────────────────────────────────────
+async function loadFacultyTimetable() {
+    const name = document.getElementById('facTTName').value.trim();
+    if (!name) { showStatus('Enter faculty name', 'error'); return; }
+    const res = await fetch(`${API}/timetable/faculty?name=${encodeURIComponent(name)}`);
+    const slots = await res.json();
+    document.getElementById('facultyTimetableContainer').innerHTML =
+        buildGrid(slots, `Faculty Timetable · ${name}`);
+}
+
+// ── ROOM UTILIZATION ──────────────────────────────────────────
+async function loadRoomUtilization() {
+    const room = document.getElementById('roomNum').value.trim().toUpperCase();
+    if (!room) { showStatus('Enter room number', 'error'); return; }
+    const res = await fetch(`${API}/timetable/room?room=${room}`);
+    const slots = await res.json();
+    document.getElementById('roomContainer').innerHTML =
+        buildGrid(slots, `Room Utilization · ${room}`);
+}
+
+// ── USERS ─────────────────────────────────────────────────────
+async function addUser() {
+    const username   = document.getElementById('newUsername').value.trim();
+    const password   = document.getElementById('newPassword').value.trim();
+    const fullName   = document.getElementById('newFullName').value.trim();
+    const department = document.getElementById('newDepartment').value.trim();
+    const role       = document.getElementById('newRole').value;
+    if (!username || !password) { showStatus('Username and password required', 'error'); return; }
+    await fetch(`${API}/auth/users`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({username, password, fullName, department, role})
+    });
+    showStatus('User added!', 'success');
+    document.getElementById('newUsername').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('newFullName').value = '';
+    document.getElementById('newDepartment').value = '';
+    loadUsers();
+}
+
+async function loadUsers() {
+    const res = await fetch(`${API}/auth/users`);
+    const users = await res.json();
+    const roleBadge = r => {
+        const map = {ADMIN:'role-admin', PRINCIPAL:'role-principal', FACULTY:'role-faculty'};
+        return `<span class="role-badge ${map[r]||'role-faculty'}">${r}</span>`;
+    };
+    document.getElementById('userList').innerHTML = users.length
+        ? users.map(u => `
+            <div class="list-item">
+                <span><strong>${u.fullName || u.username}</strong> · ${u.username} · ${roleBadge(u.role)}</span>
+                <button onclick="deleteUser(${u.id})">✕</button>
+            </div>`).join('')
+        : '<div style="color:#374151;font-size:0.82rem;">No users yet</div>';
+}
+
+async function deleteUser(id) {
+    await fetch(`${API}/auth/users/${id}`, {method:'DELETE'});
+    loadUsers();
+}
+
+// ── PDF EXPORT ────────────────────────────────────────────────
+function exportPDF(title) {
+    const containers = {
+        'Section Timetable': 'sectionTimetableContainer',
+        'Faculty Timetable': 'facultyTimetableContainer',
+        'Room Utilization': 'roomContainer'
+    };
+    const containerId = containers[title] || 'sectionTimetableContainer';
+    const content = document.getElementById(containerId).innerHTML;
+
+    if (!content || content.trim() === '') {
+        showStatus('Please load a timetable first before exporting.', 'error');
+        return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${title} - College Scheduler</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; color: #000; }
+                h2 { color: #333; margin-bottom: 5px; font-size: 16px; }
+                .meta { color: #666; font-size: 11px; margin-bottom: 15px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                th { background: #333; color: white; padding: 7px; font-size: 10px; text-align: center; border: 1px solid #999; }
+                td { padding: 5px; border: 1px solid #ddd; text-align: center; font-size: 9px; vertical-align: top; min-width: 80px; }
+                .slot { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 3px; padding: 3px; margin: 1px; }
+                .slot-subject { font-weight: bold; color: #2e7d32; font-size: 9px; }
+                .slot-faculty { color: #555; font-size: 8px; }
+                .slot-room { color: #1565c0; font-size: 8px; }
+                .card h2 { font-size: 13px; color: #333; text-transform: uppercase; letter-spacing: 1px; }
+                .empty { color: #ccc; }
+                .footer-print { margin-top: 20px; text-align: center; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
+                @media print { body { margin: 0; padding: 10px; } }
+            </style>
+        </head>
+        <body>
+            ${content}
+            <div class="footer-print">
+                Built by Gudi Indhu Reddy · ${new Date().toLocaleDateString('en-IN')}
+            </div>
+            <script>window.onload = () => { window.print(); }<\/script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+loadStats();
+loadCurrentUser();
+</script>
+</body>
+</html>
